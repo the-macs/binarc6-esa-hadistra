@@ -4,9 +4,9 @@
         <img class="mb-4" src="images/logo.png" alt="" width="72" height="57">
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
-        <% if (message) { %>
-        <div class="alert alert-danger" role="alert">
-            <%= message %>
+        <% if (message.length != 0) { %>
+        <div class="alert alert-<%= message.msgType %>" role="alert">
+            <%= message.msg %>
         </div>
         <% } %>
         <div class="form-floating mb-2">

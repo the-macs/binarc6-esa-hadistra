@@ -10,7 +10,10 @@ module.exports = {
         res.render('login', {
             layout: 'layouts/_main-layout',
             title: 'User Login',
-            message: req.session.err
+            message: {
+                msgType: req.flash('msgType'),
+                msg: req.flash('msg')
+            }
         })
     },
     auth: async (req, res) => {
@@ -30,11 +33,13 @@ module.exports = {
 
                 res.redirect('/')
             } else {
-                req.session.err = "Incorrect password"
+                req.flash('msgType', 'danger')
+                req.flash('msg', 'Incorrect password')
                 res.redirect('/login')
             }
         } else {
-            req.session.err = "Username not found"
+            req.flash('msgType', 'danger')
+            req.flash('msg', 'Username not found')
             res.redirect('/login')
         }
     },
@@ -48,7 +53,10 @@ module.exports = {
         res.render('signup', {
             layout: 'layouts/_main-layout',
             title: 'User Register',
-            message: req.session.err
+            message: {
+                msgType: req.flash('msgType'),
+                msg: req.flash('msg')
+            }
         })
     },
     register: async (req, res) => {
@@ -57,17 +65,20 @@ module.exports = {
         const userRegistered = dataUsers.find((data) => data.username == username)
 
         if (userRegistered) {
-            req.session.err = "Username already exist"
+            req.flash('msg', `Username already exist`)
             res.redirect('/sign-up')
         } else {
             if (password !== password_confirmation) {
-                req.session.err = "Password doesn't match"
+                req.flash('msg', `Password doesn't match`)
                 res.redirect('/sign-up')
             } else {
                 const salt = await bcrypt.genSalt(10)
                 const hashedPassword = await bcrypt.hash(password, salt)
 
                 users.storeUser(name, username, hashedPassword)
+
+                req.flash('msgType', 'success')
+                req.flash('msg', 'Register Successfully')
 
                 res.redirect('/login')
             }
