@@ -1,11 +1,12 @@
 const express = require('express')
 const router = express.Router()
 
-const users = require('./../../models/users.model')
+const User = require('../../models/user.model')
 
 // API
-router.get('/api/users', (req, res) => {
-    res.json(users.getUsers())
+router.get('/api/users', async (req, res) => {
+    const users = await User.find()
+    res.json(users)
 })
 
 module.exports = router

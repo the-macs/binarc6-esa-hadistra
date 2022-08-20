@@ -14,6 +14,8 @@ const cookieParser = require('cookie-parser')
 
 const flash = require('connect-flash')
 
+require('./src/configs/db.config')
+
 app.set('view engine', 'ejs')
 app.use(expressLayouts)
 

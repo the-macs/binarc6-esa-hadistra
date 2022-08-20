@@ -1,7 +1,5 @@
 const bcrypt = require('bcrypt')
-const users = require('./../models/users.model')
-
-const dataUsers = users.getUsers()
+const User = require('../models/user.model')
 
 const { generateToken } = require('../utils/jtwToken.utils')
 
@@ -17,15 +15,12 @@ module.exports = {
         })
     },
     auth: async (req, res) => {
-        const dataInput = {
-            username: req.body.username,
-            password: req.body.password
-        }
+        const { username, password } = req.body
 
-        const user = dataUsers.find((data) => data.username == dataInput.username)
+        const user = await User.findOne({ username: username })
 
         if (user) {
-            const match = await bcrypt.compare(dataInput.password, user.password);
+            const match = await bcrypt.compare(password, user.password);
             if (match) {
                 const token = await generateToken(user.id)
 
@@ -62,7 +57,7 @@ module.exports = {
     register: async (req, res) => {
         const { name, username, password, password_confirmation } = req.body
 
-        const userRegistered = dataUsers.find((data) => data.username == username)
+        const userRegistered = await User.findOne({ username: username })
 
         if (userRegistered) {
             req.flash('msg', `Username already exist`)
@@ -75,35 +70,46 @@ module.exports = {
                 const salt = await bcrypt.genSalt(10)
                 const hashedPassword = await bcrypt.hash(password, salt)
 
-                users.storeUser(name, username, hashedPassword)
+                await User.insertMany({ name, username, password: hashedPassword }, (error, result) => {
+                    if (!error) {
+                        req.flash('msgType', 'success')
+                        req.flash('msg', 'Register Successfully')
 
-                req.flash('msgType', 'success')
-                req.flash('msg', 'Register Successfully')
+                        res.redirect('/login')
+                    } else {
+                        req.flash('msgType', 'danger')
+                        req.flash('msg', 'Register Failed')
 
-                res.redirect('/login')
+                        res.redirect('/register')
+                    }
+
+                })
             }
         }
     },
-    updateUser: (req, res) => {
+    updateUser: async (req, res) => {
         const { _id, name, password } = req.body
-        dataUsers.filter(async (user) => {
-            if (user.id == _id) {
-                user.id = _id
-                user.name = name
 
-                if (password != '') {
-                    const salt = await bcrypt.genSalt(10)
-                    const hashedPassword = await bcrypt.hash(password, salt)
-                    user.password = hashedPassword
+        const user = await User.findOne({ _id: _id })
+
+        let newPassword = user.password
+
+        if (password != '') {
+            const salt = await bcrypt.genSalt(10)
+            newPassword = await bcrypt.hash(password, salt)
+        }
+
+        await User.updateOne(
+            { _id: _id },
+            {
+                $set: {
+                    name: name,
+                    password: newPassword,
                 }
-
-                req.user = user
-
-                return user
             }
-        })
+        )
 
-        const token = generateToken(_id)
+        const token = await generateToken(_id)
 
         req.header.authorization = token
 
@@ -116,12 +122,10 @@ module.exports = {
             user: req.user
         })
     },
-    deleteUser: (req, res) => {
-        const _id = req.body._id
+    deleteUser: async (req, res) => {
+        const { _id } = req.body
 
-        users.deleteUser(_id)
-
-        delete req.header.authorization
+        await User.deleteOne({ _id: _id }).then(result => delete req.header.authorization)
 
         req.session.destroy()
         res.redirect('/')

@@ -1,11 +1,11 @@
-const users = require('../models/users.model')
+const User = require('../models/user.model')
 const jwt = require('jsonwebtoken')
 
-const dataUsers = users.getUsers()
+// const dataUsers = users.getUsers()
 
 module.exports = {
-    generateToken: (_id) => {
-        const user = dataUsers.find((data) => data.id == _id)
+    generateToken: async (_id) => {
+        const user = await User.findOne({ _id: _id })
 
         const token = jwt.sign(
             {
@@ -15,7 +15,7 @@ module.exports = {
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: '10s'
+                expiresIn: '24h'
             }
         )
 
