@@ -2,7 +2,7 @@ class Suit {
     #choices
 
     constructor() {
-        this.#choices = ['batu', 'kertas', 'gunting']
+        this.#choices = ['rock', 'paper', 'scissor']
     }
 
     playerChoosen = (pId) => {
@@ -26,7 +26,7 @@ class Suit {
     }
 
     resultChoice = (playerChoice, comChoice) => {
-        if (playerChoice === "kertas" && comChoice === "batu" || playerChoice === "batu" && comChoice === "gunting" || playerChoice === "gunting" && comChoice === "kertas") {
+        if (playerChoice === "paper" && comChoice === "rock" || playerChoice === "rock" && comChoice === "scissor" || playerChoice === "scissor" && comChoice === "paper") {
             document.getElementById("text-middle").innerHTML = '<h1 class="text-middle-win">Player 1 Win</h1>';
             return 'Win'
         }
@@ -80,6 +80,17 @@ class Suit {
             console.log('Player Choice => ' + value)
             console.log('Computer Choice => ' + comChoices)
             console.log('Result => ' + resultChoices)
+
+            axios.post(window.location.origin + '/api/user-history', {
+                userChoice: value,
+                comChoice: comChoices,
+                result: resultChoices
+            })
+                .then((result) => {
+                    console.log('User History => ' + result)
+                })
+
+
         }, 5000)
     }
 

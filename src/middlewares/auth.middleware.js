@@ -18,5 +18,16 @@ module.exports = {
         } else {
             res.redirect('/login')
         }
-    }
+    },
+    isAuthenticatedWithAdmin: (req, res, next) => {
+        const token = req.header.authorization
+        const verify = getUserVerified(token)
+
+        if (verify && verify.role === 'admin') {
+            req.user = verify
+            next()
+        } else {
+            res.redirect('/login')
+        }
+    },
 }

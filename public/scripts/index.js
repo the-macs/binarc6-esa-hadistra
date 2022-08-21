@@ -1,4 +1,4 @@
-const options = ['batu', 'kertas', 'gunting']
+const options = ['rock', 'paper', 'scissor']
 
 let playerSection = comSection = ''
 

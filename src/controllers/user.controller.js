@@ -87,6 +87,13 @@ module.exports = {
             }
         }
     },
+    setting: (req, res) => {
+        res.render('setting', {
+            layout: 'layouts/_main-layout',
+            title: 'User Setting',
+            user: req.user
+        })
+    },
     updateUser: async (req, res) => {
         const { _id, name, password } = req.body
 
@@ -114,13 +121,6 @@ module.exports = {
         req.header.authorization = token
 
         res.redirect('/')
-    },
-    setting: (req, res) => {
-        res.render('setting', {
-            layout: 'layouts/_main-layout',
-            title: 'User Setting',
-            user: req.user
-        })
     },
     deleteUser: async (req, res) => {
         const { _id } = req.body

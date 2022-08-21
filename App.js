@@ -12,6 +12,8 @@ const secret = 'jakut-klonop-2022'
 const reroute = require('./src/middlewares/reroute.middleware')
 const cookieParser = require('cookie-parser')
 
+const methodOverride = require('method-override')
+
 const flash = require('connect-flash')
 
 require('./src/configs/db.config')
@@ -22,6 +24,8 @@ app.use(expressLayouts)
 app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+app.use(methodOverride('_method'))
 
 app.set('views', './views')
 
