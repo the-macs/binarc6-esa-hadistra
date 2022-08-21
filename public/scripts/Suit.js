@@ -80,7 +80,8 @@ class Suit {
             axios.post(window.location.origin + '/api/user-history', {
                 userChoice: value,
                 comChoice: comChoices,
-                result: resultChoices
+                result: resultChoices,
+                timestamp: Date.now()
             })
 
 

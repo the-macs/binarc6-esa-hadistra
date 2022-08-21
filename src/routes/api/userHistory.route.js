@@ -11,7 +11,7 @@ router.use(authMiddleware.isAuthenticatedWithAdmin)
 
 router.route('/user-history')
     .post(async (req, res) => {
-        const { userChoice, comChoice, result } = req.body
+        const { userChoice, comChoice, result, timestamp } = req.body
 
         const token = req.header.authorization
         const verify = getUserVerified(token)
@@ -25,6 +25,7 @@ router.route('/user-history')
                 user: verify,
                 userChoice,
                 comChoice,
+                timestamp,
                 result
             })
 

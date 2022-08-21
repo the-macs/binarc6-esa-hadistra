@@ -19,7 +19,7 @@ const UserHistory = mongoose.model('user_game_history', {
     },
     timestamp: {
         type: Date,
-        default: Date.now()
+        required: true
     }
 })
 
