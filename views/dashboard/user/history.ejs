@@ -24,7 +24,7 @@
                             <td><%= history.userChoice %></td>
                             <td><%= history.comChoice %></td>
                             <td><span
-                                    class="badge bg-<%= history.result == 'Win' ? 'success' : 'danger' %>"><%= history.result %></span>
+                                    class="badge bg-<%= history.result == 'Win' ? 'success' : (history.result == 'Draw' ? 'warning' : 'danger') %>"><%= history.result %></span>
                             </td>
                             <td><%= history.timestamp.toLocaleDateString("en-ID", {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) %>
                             </td>

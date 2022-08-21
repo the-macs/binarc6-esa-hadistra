@@ -77,18 +77,11 @@ class Suit {
 
             this.comChoosen(comChoices)
 
-            console.log('Player Choice => ' + value)
-            console.log('Computer Choice => ' + comChoices)
-            console.log('Result => ' + resultChoices)
-
             axios.post(window.location.origin + '/api/user-history', {
                 userChoice: value,
                 comChoice: comChoices,
                 result: resultChoices
             })
-                .then((result) => {
-                    console.log('User History => ' + result)
-                })
 
 
         }, 5000)
