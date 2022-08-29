@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const UserHistory = mongoose.model('user_game_history', {
+const UserHistorySchema = mongoose.Schema({
     user: {
         type: Object,
         required: true
@@ -21,6 +21,8 @@ const UserHistory = mongoose.model('user_game_history', {
         type: Date,
         required: true
     }
-})
+}, { versionKey: false })
+
+const UserHistory = mongoose.model('UserHistory', UserHistorySchema)
 
 module.exports = UserHistory

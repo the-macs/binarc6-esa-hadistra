@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 
 const User = require('./../../models/user.model')
 const UserHistory = require('./../../models/userHistory.model')
+const UserBiodata = require('./../../models/userBiodata.model')
 
 module.exports = {
     index: async (req, res) => {
@@ -156,6 +157,77 @@ module.exports = {
             })
         } catch (err) {
             console.log(err)
+            res.send(err)
+        }
+    },
+    updateBiodata: async (req, res) => {
+        const { userId, email, birthplace, birthdate, gender, nationality, phone } = req.body
+
+        const user = await User.findOne({ _id: userId })
+
+        const insertUser = {
+            _id: userId,
+            name: user.name,
+            username: user.username,
+            role: user.role
+        }
+        console.log(userId)
+
+        try {
+            const query = { 'user._id': userId }
+
+            const update = {
+                $set: {
+                    user: insertUser,
+                    email,
+                    birthplace,
+                    birthdate,
+                    gender,
+                    nationality,
+                    phone
+                }
+            }
+
+            const options = {
+                upsert: true,
+                new: true,
+                setDefaultsOnInsert: true
+            }
+
+            await UserBiodata.findOneAndUpdate(query, update, options)
+                .then((user) => {
+                    req.flash('msgType', 'success')
+                    req.flash('msg', 'Biodata has been updated Successfully')
+                    res.redirect(`/dashboard/user-biodata/${userId}`)
+                }).catch(err => {
+                    console.log(err)
+                    req.flash('msgType', 'danger')
+                    req.flash('msg', 'Error occured while updating biodata')
+                    res.redirect(`/dashboard/user-biodata/${userId}`)
+                })
+        } catch (err) {
+            req.flash('msgType', 'danger')
+            req.flash('msg', 'Error occured while updating biodata')
+            console.log(err)
+            res.redirect(`/dashboard/user-biodata/${userId}`)
+        }
+    },
+    getBiodata: async (req, res) => {
+        const _id = req.params.id
+
+        try {
+            const userBiodata = await UserBiodata.findOne({ "user._id": _id })
+            const selectedUser = await User.findOne({ _id })
+
+
+            console.log(userBiodata)
+            res.render('dashboard/user/biodata', {
+                layout: 'layouts/_dashboard-layout',
+                user: req.user,
+                selectedUser: selectedUser,
+                userBiodata: userBiodata
+            })
+        } catch (err) {
             res.send(err)
         }
     }

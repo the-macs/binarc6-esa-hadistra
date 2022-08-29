@@ -7,7 +7,7 @@ const UserHistory = require('./../../models/userHistory.model')
 
 const authMiddleware = require('./../../middlewares/auth.middleware')
 
-router.use(authMiddleware.isAuthenticatedWithAdmin)
+router.use(authMiddleware.apiIsAuthenticatedWithAdmin)
 
 router.route('/user-history')
     .post(async (req, res) => {
@@ -20,9 +20,16 @@ router.route('/user-history')
 
         if (!req.body) res.status(400).json({ message: "Missing parameters" })
 
+        const user = {
+            _id: verify._id,
+            name: verify.name,
+            username: verify.username,
+            role: verify.role
+        }
+
         try {
             await UserHistory.insertMany({
-                user: verify,
+                user,
                 userChoice,
                 comChoice,
                 timestamp,
