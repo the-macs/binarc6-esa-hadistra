@@ -1,11 +1,9 @@
 const responseDefaults = () => {
     const response = {
         'meta': {
-            'code': 200,
             'status': 'success',
             'message': null,
-        },
-        'data': null,
+        }
     }
 
     return response
@@ -20,13 +18,11 @@ module.exports = {
 
         return response
     },
-    responseError: (code = 404, message = null, data = null) => {
+    responseError: (message = null) => {
         const response = responseDefaults()
 
         response.meta.status = 'error'
         response.meta.message = message
-        response.meta.code = code
-        response.data = data
 
         return response
     }

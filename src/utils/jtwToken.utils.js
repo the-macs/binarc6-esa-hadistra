@@ -4,12 +4,12 @@ const jwt = require('jsonwebtoken')
 // const dataUsers = users.getUsers()
 
 module.exports = {
-    generateToken: async (_id) => {
-        const user = await User.findOne({ _id: _id })
+    generateToken: async (id) => {
+        const user = await User.getUserById(id)
 
         const token = jwt.sign(
             {
-                _id: user.id,
+                id: user.id,
                 name: user.name,
                 role: user.role,
                 username: user.username,

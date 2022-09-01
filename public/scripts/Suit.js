@@ -77,11 +77,17 @@ class Suit {
 
             this.comChoosen(comChoices)
 
+            let date = new Date()
+
             axios.post(window.location.origin + '/api/user-history', {
                 userChoice: value,
                 comChoice: comChoices,
                 result: resultChoices,
-                timestamp: Date.now()
+                playingAt: date.toISOString()
+            }).then((res) => {
+                console.log(res.data.data)
+            }).catch((err) => {
+                console.log(err)
             })
 
 

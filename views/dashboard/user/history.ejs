@@ -1,7 +1,7 @@
 <div class="my-5">
     <div class="card">
         <div class="card-header">
-            <h3><strong>History of <%= selectedUser.name %> </strong></h3>
+            <h3><strong>History of <%= userHistory[0]?.name %> </strong></h3>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -16,17 +16,17 @@
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                        <% if (userHistory !== null && userHistory.length !== 0) { %>
+                        <% if (userHistory && userHistory.length !== 0) { %>
 
                         <% userHistory.forEach((history, index) => {%>
                         <tr>
                             <th scope="row"><%= index + 1 %></th>
-                            <td><%= history.userChoice %></td>
-                            <td><%= history.comChoice %></td>
+                            <td><%= history.user_choice %></td>
+                            <td><%= history.com_choice %></td>
                             <td><span
                                     class="badge bg-<%= history.result == 'Win' ? 'success' : (history.result == 'Draw' ? 'warning' : 'danger') %>"><%= history.result %></span>
                             </td>
-                            <td><%= history.timestamp.toLocaleDateString("en-ID", {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',hour: 'numeric', minute: 'numeric',second: 'numeric'}) %>
+                            <td><%= history.playing_at.toLocaleDateString("en-ID", {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',hour: 'numeric', minute: 'numeric',second: 'numeric'}) %>
                             </td>
                         </tr>
                         <%}); %>

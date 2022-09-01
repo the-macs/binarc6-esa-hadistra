@@ -33,14 +33,12 @@
                             <td><%= user.name %></td>
                             <td><%= user.role %></td>
                             <td>
-                                <!-- href="/dashboard/user-bio/<%= user._id %>" -->
-                                <!-- data-bs-toggle="modal" data-bs-target="#exampleModal"  -->
-                                <button data-id="<%= user._id %>" class="btn btn-primary btn-sm bio-modal">Bio</button>
-                                <a href="/dashboard/user-history/<%= user._id %>"
+                                <button data-id="<%= user.id %>" class="btn btn-primary btn-sm bio-modal">Bio</button>
+                                <a href="/dashboard/user-history/<%= user.id %>"
                                     class="btn btn-primary btn-sm">History</a>
-                                <a href="/dashboard/user/edit/<%= user._id %>" class="btn btn-primary btn-sm">Edit</a>
+                                <a href="/dashboard/user/edit/<%= user.id %>" class="btn btn-primary btn-sm">Edit</a>
                                 <form action="/dashboard/user?_method=DELETE" class="d-inline" method="POST">
-                                    <input type="hidden" name="_id" value="<%= user._id %>" />
+                                    <input type="hidden" name="id" value="<%= user.id %>" />
                                     <button type="submit" class="btn btn-danger btn-sm"
                                         onclick="return confirm('Are you sure?')">Delete</button>
                                 </form>
@@ -62,7 +60,7 @@
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <input type="hidden" name="_id" id="userId">
+        <input type="hidden" name="id" id="userId">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Biodata</h5>
@@ -121,36 +119,38 @@
 <script>
     $(document).ready(() => {
         $('.bio-modal').on('click', async (evt) => {
-            const _id = evt.currentTarget.getAttribute('data-id')
+            const id = evt.currentTarget.getAttribute('data-id')
+
             let myModal = new bootstrap.Modal($('#exampleModal'), {});
 
+            const nullChecker = (value) => !value ? `<i class="text-muted">No Data Available</i>` : value
+
             try {
-                const response = await axios.get(`${window.location.origin}/api/user-biodata/${_id}`)
+                const response = await axios.get(`${window.location.origin}/dashboard/get-user-biodata/${id}`)
                 if (!response.data) {
                     alert(response.data.meta.message)
                     return
                 } else {
-                    myModal.show();
-
                     const data = response.data.data
-
                     if (data) {
-                        $('#userId').val(_id)
-                        $('#td-email').html(data.email)
-                        $('#td-birthplace').html(data.birthplace)
-                        $('#td-birthdate').html(data.birthdate)
-                        $('#td-address').html(data.address)
-                        $('#td-gender').html(data.gender)
-                        $('#td-nationality').html(data.nationality)
-                        $('#td-phone').html(data.phone)
+                        $('#userId').val(id)
+                        $('#td-email').html(nullChecker(data.email))
+                        $('#td-birthplace').html(nullChecker(data.birthplace))
+                        $('#td-birthdate').html(nullChecker(data.birthdate))
+                        $('#td-address').html(nullChecker(data.address))
+                        $('#td-gender').html(nullChecker(data.gender))
+                        $('#td-nationality').html(nullChecker(data.nationality))
+                        $('#td-phone').html(nullChecker(data.phone))
 
-                        $('.btn-edit').attr('href', `/dashboard/user-biodata/${_id}`)
+                        $('.btn-edit').attr('href', `/dashboard/user-biodata/${id}`)
                     } else {
-                        $('.btn-edit').attr('href', `/dashboard/user-biodata/${_id}`)
+                        $('.btn-edit').attr('href', `/dashboard/user-biodata/${id}`)
                         $('.td-modal').html('<i class="text-muted">No Data Available</i>')
                     }
+                    myModal.show();
                 }
             } catch (err) {
+                alert('Error: ' + err.message)
                 console.log(err.message)
             }
         })

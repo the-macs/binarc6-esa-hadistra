@@ -29,7 +29,7 @@ module.exports = {
             req.user = verify
             next()
         } else {
-            res.status(403).json(responseError(403, 'User not authenticated'))
+            res.status(403).json(responseError('User not authenticated'))
         }
     },
     isAuthenticatedWithAdmin: (req, res, next) => {

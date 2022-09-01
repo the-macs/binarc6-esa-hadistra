@@ -1,8 +1,13 @@
-const mongoose = require('mongoose');
+const { Pool } = require('pg')
 
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+const pool = new Pool()
+
+pool.connect((err) => {
+    if (!err) {
+        console.log('PostgreSQL Connected')
+    } else {
+        console.error(err)
+    }
 })
-    .then(result => console.log('Connected to MongoDB'))
-    .catch(err => console.log('Error connecting' + err));
+
+module.exports = pool

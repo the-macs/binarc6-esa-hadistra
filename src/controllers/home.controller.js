@@ -1,5 +1,7 @@
 const { getUserVerified } = require('./../utils/jtwToken.utils')
 
+const client = require('./../configs/db.config')
+
 module.exports = {
     index: async (req, res) => {
         const token = req.header.authorization

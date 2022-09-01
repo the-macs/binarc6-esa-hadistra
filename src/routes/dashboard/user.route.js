@@ -5,30 +5,29 @@ const dashboardUserController = require('../../controllers/dashboard/user.contro
 
 const authMiddleware = require('./../../middlewares/auth.middleware')
 
-// router.use(authMiddleware.isAuthenticatedWithAdmin)
+router.use(authMiddleware.isAuthenticatedWithAdmin)
 
+// Main Dashboard
 router.get('/', (req, res) => res.redirect('/dashboard/user'))
 
-router.get('/user', dashboardUserController.index)
+// User
+router.route('/user')
+    .get(dashboardUserController.index)
+    .post(dashboardUserController.store)
+    .put(dashboardUserController.update)
+    .delete(dashboardUserController.delete)
 
 router.get('/user/create', dashboardUserController.create)
-
-
 router.get('/user/edit/:id', dashboardUserController.edit)
 
-router.post('/user', dashboardUserController.store)
-
-router.put('/user', dashboardUserController.update)
-
-
-router.delete('/user', dashboardUserController.delete)
-
 // History
-router.get('/user-history/:id', dashboardUserController.getHistory)
+router.get('/user-history/:id', dashboardUserController.indexHistory)
 
 // Biodata
-router.get('/user-biodata/:id', dashboardUserController.getBiodata)
+router.get('/user-biodata/:id', dashboardUserController.editBiodata)
 router.put('/user-biodata', dashboardUserController.updateBiodata)
 
+// Popup Modal
+router.get('/get-user-biodata/:id', dashboardUserController.getUserBiodata)
 
 module.exports = router

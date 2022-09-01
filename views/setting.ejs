@@ -1,7 +1,7 @@
 <main class="form-signin w-100 m-auto">
 
     <form method="POST" action="/setting">
-        <input type="hidden" name="_id" value="<%= user._id %>">
+        <input type="hidden" name="id" value="<%= user.id %>">
         <h1 class="h3 mb-3 fw-normal">User Setting</h1>
 
         <div class="form-floating mb-2">
@@ -24,7 +24,7 @@
         <button class="w-100 btn btn-lg btn-primary mt-4" type="submit">Update</button>
     </form>
     <form action="/delete-account" method="POST">
-        <input type="hidden" name="_id" value="<%= user._id %>">
+        <input type="hidden" name="id" value="<%= user.id %>">
         <button class="w-100 btn btn-lg btn-danger mt-4" type="submit"
             onclick="return confirm('Sure to delete this account ?')">Delete Account</button>
     </form>

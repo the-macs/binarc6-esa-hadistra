@@ -14,36 +14,6 @@ module.exports = {
             }
         })
     },
-    auth: async (req, res) => {
-        const { username, password } = req.body
-
-        const user = await User.findOne({ username: username })
-
-        if (user) {
-            const match = await bcrypt.compare(password, user.password);
-            if (match) {
-                const token = await generateToken(user.id)
-
-                req.header.authorization = token
-
-                res.redirect('/')
-            } else {
-                req.flash('msgType', 'danger')
-                req.flash('msg', 'Incorrect password')
-                res.redirect('/login')
-            }
-        } else {
-            req.flash('msgType', 'danger')
-            req.flash('msg', 'Username not found')
-            res.redirect('/login')
-        }
-    },
-    logout: (req, res) => {
-        delete req.header.authorization
-
-        req.session.destroy()
-        res.redirect('/')
-    },
     signup: (req, res) => {
         res.render('signup', {
             layout: 'layouts/_main-layout',
@@ -57,7 +27,7 @@ module.exports = {
     register: async (req, res) => {
         const { name, username, password, password_confirmation } = req.body
 
-        const userRegistered = await User.findOne({ username: username })
+        const userRegistered = await User.getUserByUsername(username)
 
         if (userRegistered) {
             req.flash('msg', `Username already exist`)
@@ -70,20 +40,19 @@ module.exports = {
                 const salt = await bcrypt.genSalt(10)
                 const hashedPassword = await bcrypt.hash(password, salt)
 
-                await User.insertMany({ name, username, password: hashedPassword }, (error, result) => {
-                    if (!error) {
-                        req.flash('msgType', 'success')
-                        req.flash('msg', 'Register Successfully')
+                try {
+                    await User.storeUser({ name, username, role: 'player', password: hashedPassword })
 
-                        res.redirect('/login')
-                    } else {
-                        req.flash('msgType', 'danger')
-                        req.flash('msg', 'Register Failed')
+                    req.flash('msgType', 'success')
+                    req.flash('msg', 'Register Successfully')
 
-                        res.redirect('/register')
-                    }
+                    res.redirect('/login')
+                } catch (error) {
+                    req.flash('msgType', 'danger')
+                    req.flash('msg', 'Register Failed')
 
-                })
+                    res.redirect('/register')
+                }
             }
         }
     },
@@ -95,26 +64,26 @@ module.exports = {
         })
     },
     updateUser: async (req, res) => {
-        const { _id, name, password } = req.body
+        const { id, name, password } = req.body
 
-        const user = await User.findOne({ _id: _id })
+        const user = await User.getUserById(id, {
+            withPassword: true
+        })
 
         let newPassword = user.password
+
+        let role = user.role
 
         if (password != '') {
             const salt = await bcrypt.genSalt(10)
             newPassword = await bcrypt.hash(password, salt)
         }
 
-        await User.updateOne(
-            { _id: _id },
-            {
-                $set: {
-                    name: name,
-                    password: newPassword,
-                }
-            }
-        )
+        await User.updateUser(id, {
+            name,
+            role,
+            password: newPassword
+        })
 
         const token = await generateToken(_id)
 
@@ -123,9 +92,9 @@ module.exports = {
         res.redirect('/')
     },
     deleteUser: async (req, res) => {
-        const { _id } = req.body
+        const { id } = req.body
 
-        await User.deleteOne({ _id: _id }).then(result => delete req.header.authorization)
+        await User.deleteUser(id).then(result => delete req.header.authorization)
 
         req.session.destroy()
         res.redirect('/')
