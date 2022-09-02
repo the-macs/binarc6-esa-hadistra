@@ -85,7 +85,7 @@ module.exports = {
             password: newPassword
         })
 
-        const token = await generateToken(_id)
+        const token = await generateToken(id)
 
         req.header.authorization = token
 
