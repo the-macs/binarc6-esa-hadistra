@@ -1,8 +1,7 @@
 const pool = require('./../configs/db.config')
 
-module.exports = {
-    getHistory: async (id) => {
-
+class UserHistory {
+    async getHistory(id) {
         try {
             const query = `
             SELECT
@@ -25,13 +24,10 @@ module.exports = {
             return rslt?.rows
         } catch (err) {
             throw new Error(err.message)
-
         }
+    }
 
-
-
-    },
-    storeHistory: async (insertObject) => {
+    async storeHistory(insertObject) {
         try {
             const { user_game_id, user_choice, com_choice, result, playing_at } = insertObject
 
@@ -62,3 +58,5 @@ module.exports = {
         }
     }
 }
+
+module.exports = new UserHistory()

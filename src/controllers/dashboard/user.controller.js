@@ -186,8 +186,7 @@ module.exports = {
                 address,
                 gender,
                 nationality,
-                phone,
-                user_game_id
+                phone
             }
 
             await UserBiodata.updateUserBiodata(user_game_id, update)

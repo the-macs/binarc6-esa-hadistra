@@ -1,7 +1,7 @@
 const pool = require('./../configs/db.config')
 
-module.exports = {
-    getUser: async (options = {}) => {
+class User {
+    async getUser(options = {}) {
         try {
             const withTrashed = options.withTrashed ?? false
             const onlyTrashed = options.onlyTrashed ?? false
@@ -36,8 +36,9 @@ module.exports = {
             throw new Error(err)
         }
 
-    },
-    getUserById: async (id, options = {}) => {
+    }
+
+    async getUserById(id, options = {}) {
         try {
             const withPassword = options.withPassword ?? false
 
@@ -66,9 +67,9 @@ module.exports = {
         } catch (err) {
             throw new Error(err)
         }
+    }
 
-    },
-    getUserByUsername: async (username, options = {}) => {
+    async getUserByUsername(username, options = {}) {
         try {
             const withPassword = options.withPassword ?? false
 
@@ -101,9 +102,9 @@ module.exports = {
         } catch (err) {
             throw new Error(err)
         }
+    }
 
-    },
-    storeUser: async (insertObject) => {
+    async storeUser(insertObject) {
         const client = await pool.connect()
 
         try {
@@ -132,8 +133,9 @@ module.exports = {
 
             throw new Error(err)
         }
-    },
-    updateUser: async (id, updateObject) => {
+    }
+
+    async updateUser(id, updateObject) {
         const client = await pool.connect()
 
         try {
@@ -178,8 +180,9 @@ module.exports = {
 
             throw new Error(err)
         }
-    },
-    deleteUser: async (id) => {
+    }
+
+    async deleteUser(id) {
         try {
             const query = `
             UPDATE
@@ -208,4 +211,7 @@ module.exports = {
             return false
         }
     }
+
 }
+
+module.exports = new User()

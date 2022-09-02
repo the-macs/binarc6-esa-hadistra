@@ -1,43 +1,7 @@
 const pool = require('./../configs/db.config')
 
-module.exports = {
-    // getUser: async (options = {}) => {
-    //     try {
-    //         const withTrashed = options.withTrashed ?? false
-    //         const onlyTrashed = options.onlyTrashed ?? false
-    //         const withPassword = options.withPassword ?? false
-
-    //         let trashed = 'WHERE a.deleted_at IS NULL'
-    //         if (onlyTrashed) trashed = 'WHERE a.deleted_at IS NOT NULL'
-    //         if (withTrashed) trashed = ''
-
-    //         let password = ''
-    //         if (withPassword) password = ',a.password'
-
-    //         const query = `
-    //         SELECT
-    //             a.id,
-    //             a.username,
-    //             b.name,
-    //             a.role
-    //             ${password}
-    //         FROM 
-    //             user_game a
-    //         JOIN
-    //             user_game_biodata b
-    //         ON
-    //             a.id = b.user_game_id
-    //         ${trashed}`
-
-    //         const rslt = await pool.query(query)
-
-    //         return rslt.rows
-    //     } catch (err) {
-    //         throw new Error(err)
-    //     }
-
-    // },
-    getUserBiodataById: async (id) => {
+class UserBiodata {
+    async getUserBiodataById(id) {
         try {
             const query = `
             SELECT
@@ -68,8 +32,9 @@ module.exports = {
             throw new Error(err)
         }
 
-    },
-    updateUserBiodata: async (id, updateObject) => {
+    }
+
+    async updateUserBiodata(id, updateObject) {
         try {
             const {
                 email,
@@ -78,8 +43,7 @@ module.exports = {
                 address,
                 gender,
                 nationality,
-                phone,
-                user_game_id
+                phone
             } = updateObject
 
             const query = `
@@ -106,15 +70,16 @@ module.exports = {
                     gender,
                     nationality,
                     phone,
-                    user_game_id
+                    id
                 ])
 
             return rslt.rows[0]
         } catch (err) {
             throw new Error(err)
         }
-    },
-    deleteUser: async (id) => {
+    }
+
+    async deleteUser(id) {
         try {
             const query = `
             UPDATE
@@ -133,3 +98,5 @@ module.exports = {
         }
     }
 }
+
+module.exports = new UserBiodata()
