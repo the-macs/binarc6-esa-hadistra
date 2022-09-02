@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 
 const dashboardUserController = require('../../controllers/dashboard/user.controller')
+const dashboardUserHistoryController = require('../../controllers/dashboard/userHistory.controller')
+const dashboardUserBiodataController = require('../../controllers/dashboard/userBiodata.controller')
 
 const authMiddleware = require('./../../middlewares/auth.middleware')
 
@@ -21,13 +23,13 @@ router.get('/user/create', dashboardUserController.create)
 router.get('/user/edit/:id', dashboardUserController.edit)
 
 // History
-router.get('/user-history/:id', dashboardUserController.indexHistory)
+router.get('/user-history/:id', dashboardUserHistoryController.index)
 
 // Biodata
-router.get('/user-biodata/:id', dashboardUserController.editBiodata)
-router.put('/user-biodata', dashboardUserController.updateBiodata)
+router.get('/user-biodata/:id', dashboardUserBiodataController.edit)
+router.put('/user-biodata', dashboardUserBiodataController.update)
 
 // Popup Modal
-router.get('/get-user-biodata/:id', dashboardUserController.getUserBiodata)
+router.get('/get-user-biodata/:id', dashboardUserBiodataController.getUserBiodata)
 
 module.exports = router
