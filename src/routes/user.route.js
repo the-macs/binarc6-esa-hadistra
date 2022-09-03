@@ -13,15 +13,16 @@ router.post('/auth', authMiddleware.isGuest, authController.auth)
 
 router.post('/logout', authMiddleware.isAuthenticated, authController.logout)
 
+
 // Registrasi
-router.route('/sign-up', authMiddleware.isGuest)
-    .get(userController.signup)
-    .post(userController.register)
+router.route('/sign-up',)
+    .get(authMiddleware.isGuest, userController.signup)
+    .post(authMiddleware.isGuest, userController.register)
 
 // User Setup
-router.route('/setting', authMiddleware.isAuthenticated)
-    .put(userController.updateUser)
-    .get(userController.setting)
+router.route('/setting')
+    .put(authMiddleware.isAuthenticated, userController.updateUser)
+    .get(authMiddleware.isAuthenticated, userController.setting)
 
 router.post('/delete-account', authMiddleware.isAuthenticated, userController.deleteUser)
 

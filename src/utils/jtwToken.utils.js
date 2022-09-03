@@ -1,16 +1,26 @@
-const User = require('../models/user.model')
 const jwt = require('jsonwebtoken')
 
-// const dataUsers = users.getUsers()
+const model = require('./../models/index')
+
+const userGame = model.database.user_game
+const userGameBiodata = model.database.user_game_biodata
 
 module.exports = {
     generateToken: async (id) => {
-        const user = await User.getUserById(id)
+        const user = await userGame.findOne({
+            where: { id },
+            include: {
+                model: userGameBiodata,
+                as: 'user_game_biodata',
+                attributes: ['name'],
+                required: true
+            }
+        })
 
         const token = jwt.sign(
             {
                 id: user.id,
-                name: user.name,
+                name: user.user_game_biodata.name,
                 role: user.role,
                 username: user.username,
             },

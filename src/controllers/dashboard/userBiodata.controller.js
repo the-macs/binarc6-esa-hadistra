@@ -1,4 +1,8 @@
-const UserBiodata = require('./../../models/userBiodata.model')
+const model = require('./../../models/index')
+
+const userGame = model.database.user_game
+const userGameBiodata = model.database.user_game_biodata
+
 const { getUserVerified } = require('./../../utils/jtwToken.utils')
 const { responseSuccess, responseError } = require('../../utils/responseFormatter.utils')
 
@@ -7,7 +11,16 @@ module.exports = {
         const id = req.params.id
 
         try {
-            const userBiodata = await UserBiodata.getUserBiodataById(id)
+            const userBiodata = await userGameBiodata.findOne({
+                where: { user_game_id: id },
+                include: {
+                    model: userGame,
+                    as: 'user_game',
+                    attributes: ['username', 'role'],
+                    required: true
+                }
+            })
+
             res.render('dashboard/user/biodata', {
                 layout: 'layouts/_dashboard-layout',
                 user: req.user,
@@ -18,7 +31,6 @@ module.exports = {
                 },
             })
         } catch (err) {
-            console.error(err);
             res.send(err)
         }
     },
@@ -26,7 +38,7 @@ module.exports = {
         const { user_game_id, email, birthplace, birthdate, address, gender, nationality, phone } = req.body
 
         try {
-            const update = {
+            await userGameBiodata.update({
                 email,
                 birthplace,
                 birthdate,
@@ -34,9 +46,7 @@ module.exports = {
                 gender,
                 nationality,
                 phone
-            }
-
-            await UserBiodata.updateUserBiodata(user_game_id, update)
+            }, { where: { user_game_id } })
 
             req.flash('msgType', 'success')
             req.flash('msg', 'Biodata has been updated Successfully')
@@ -44,7 +54,6 @@ module.exports = {
         } catch (err) {
             req.flash('msgType', 'danger')
             req.flash('msg', 'Error occured while updating biodata')
-            console.log(err)
             res.redirect(`/dashboard/user-biodata/${user_game_id}`)
         }
     },
@@ -57,7 +66,15 @@ module.exports = {
         if (!verify) return res.status(401).json(responseError(401, 'User Unverified'))
 
         try {
-            const userBiodata = await UserBiodata.getUserBiodataById(id)
+            const userBiodata = await userGameBiodata.findOne({
+                where: { user_game_id: id },
+                include: {
+                    model: userGame,
+                    as: 'user_game',
+                    attributes: ['username', 'role'],
+                    required: true
+                }
+            })
 
             if (!userBiodata || userBiodata.length === 0) {
                 return res.status(404).json(responseError(404, 'Data Not Found'))

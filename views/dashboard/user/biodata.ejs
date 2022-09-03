@@ -24,8 +24,7 @@
                 <div class="mb-3">
                     <label for="inputBirthdate" class="form-label">Birthdate</label>
                     <input type="text" class="form-control datepicker" id="inputBirthdate" name="birthdate"
-                        value="<%= userBiodata ? userBiodata.birthdate?.toLocaleDateString('en-CA') : '' %>"
-                        autocomplete="off">
+                        value="<%= userBiodata ? userBiodata.birthdate : '' %>" autocomplete="off">
                 </div>
                 <div class="mb-3">
                     <label for="inputAddress" class="form-label">Address</label>

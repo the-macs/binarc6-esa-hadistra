@@ -1,10 +1,23 @@
 const bcrypt = require('bcrypt')
-const User = require('./../../models/user.model')
+
+const model = require('./../../models/index')
+
+const userGame = model.database.user_game
+const userGameBiodata = model.database.user_game_biodata
+
+const { generateToken } = require('./../../utils/jtwToken.utils')
 
 module.exports = {
     index: async (req, res) => {
         try {
-            const users = await User.getUser()
+            const users = await userGame.findAll({
+                include: {
+                    model: userGameBiodata,
+                    as: 'user_game_biodata',
+                    attributes: ['name'],
+                    required: true
+                }
+            })
 
             res.render('dashboard/user/index', {
                 layout: 'layouts/_dashboard-layout',
@@ -27,42 +40,63 @@ module.exports = {
     store: async (req, res) => {
         const { username, name, role, password, passwordConfirmation } = req.body
 
-        const userRegistered = await User.getUserByUsername(username)
+        try {
+            const userRegistered = await userGame.findOne({ where: { username } })
 
-        if (userRegistered) {
-            req.flash('msgType', 'danger')
-            req.flash('msg', 'Username already exist')
-            res.redirect('/dashboard/user')
-        } else {
-            if (password !== passwordConfirmation) {
+            if (userRegistered) {
                 req.flash('msgType', 'danger')
-                req.flash('msg', 'Password is doesn\'t match')
+                req.flash('msg', 'Username already exist')
                 res.redirect('/dashboard/user')
             } else {
-                const salt = await bcrypt.genSalt(10)
-                const hashedPassword = await bcrypt.hash(password, salt)
-
-                try {
-                    await User.storeUser({
-                        name,
-                        username,
-                        role,
-                        password: hashedPassword
-                    })
-
-                    req.flash('msgType', 'success')
-                    req.flash('msg', 'Add new user success')
-                    res.redirect('/dashboard/user')
-                } catch (err) {
+                if (password !== passwordConfirmation) {
                     req.flash('msgType', 'danger')
-                    req.flash('msg', 'Error occured while creating user')
+                    req.flash('msg', 'Password is doesn\'t match')
                     res.redirect('/dashboard/user')
+                } else {
+                    const salt = await bcrypt.genSalt(10)
+                    const hashedPassword = await bcrypt.hash(password, salt)
+
+                    try {
+                        await model.transaction(async (transaction) => {
+                            const user = await userGame.create({
+                                username,
+                                role,
+                                password: hashedPassword
+                            }, { transaction })
+
+                            await userGameBiodata.create({
+                                user_game_id: user.id,
+                                name: name
+                            }, { transaction })
+                        })
+
+                        req.flash('msgType', 'success')
+                        req.flash('msg', 'Add new user success')
+                        res.redirect('/dashboard/user')
+                    } catch (err) {
+                        req.flash('msgType', 'danger')
+                        req.flash('msg', 'Error occured while creating user')
+                        res.redirect('/dashboard/user')
+                    }
                 }
             }
+        } catch (err) {
+            req.flash('msgType', 'danger')
+            req.flash('msg', 'Error occured while creating user')
+            res.redirect('/dashboard/user')
         }
+
     },
     edit: async (req, res) => {
-        const user = await User.getUserById(req.params.id)
+        const user = await userGame.findOne({
+            where: { id: req.params.id },
+            include: {
+                model: userGameBiodata,
+                as: 'user_game_biodata',
+                attributes: ['name'],
+                required: true
+            }
+        })
 
         res.render('dashboard/user/edit', {
             layout: 'layouts/_dashboard-layout',
@@ -76,60 +110,83 @@ module.exports = {
     update: async (req, res) => {
         const { id, name, role, password, passwordConfirmation } = req.body
 
-        const user = await User.getUserById(id, {
-            withPassword: true
-        })
+        try {
+            const user = await userGame.findOne({ where: { id } })
 
-        let hashedPassword = user.password
+            let hashedPassword = user.password
 
-        if (password != '') {
-            const salt = await bcrypt.genSalt(10)
-            hashedPassword = await bcrypt.hash(password, salt)
-        }
-
-        if (password !== passwordConfirmation) {
-            req.flash('msgType', 'danger')
-            req.flash('msg', 'Password is doesn\'t match')
-            res.redirect(`/dashboard/user/edit/${id}`)
-        } else {
-            try {
-                await User.updateUser(id, {
-                    name,
-                    role,
-                    password: hashedPassword
-                })
-
-                req.flash('msgType', 'success')
-                req.flash('msg', 'User has been updated Successfully')
-                res.redirect(`/dashboard/user`)
-            } catch (err) {
-                console.error(err)
-                req.flash('msgType', 'danger')
-                req.flash('msg', 'Error occured while updating user')
-                res.redirect(`/dashboard/user/edit/${id}`)
+            if (password != '') {
+                const salt = await bcrypt.genSalt(10)
+                hashedPassword = await bcrypt.hash(password, salt)
             }
+
+            if (password !== passwordConfirmation) {
+                req.flash('msgType', 'danger')
+                req.flash('msg', 'Password is doesn\'t match')
+                res.redirect(`/dashboard/user/edit/${id}`)
+            } else {
+                try {
+                    await model.transaction(async (transaction) => {
+                        await userGame.update({
+                            role,
+                            password: hashedPassword
+                        }, { where: { id }, transaction })
+
+                        await userGameBiodata.update({
+                            user_game_id: user.id,
+                            name: name
+                        }, { where: { user_game_id: id }, transaction })
+                    })
+
+                    const token = await generateToken(id)
+
+                    req.header.authorization = token
+
+                    req.flash('msgType', 'success')
+                    req.flash('msg', 'User has been updated Successfully')
+                    res.redirect(`/dashboard/user`)
+                } catch (err) {
+                    req.flash('msgType', 'danger')
+                    req.flash('msg', 'Error occured while updating user')
+                    res.redirect(`/dashboard/user/edit/${id}`)
+                }
+            }
+        } catch (err) {
+            req.flash('msgType', 'danger')
+            req.flash('msg', 'Error occured while updating user')
+            res.redirect(`/dashboard/user/edit/${id}`)
         }
     },
     delete: async (req, res) => {
         const { id } = req.body
 
-        const user = await User.getUserById(id)
+        try {
+            const user = await userGame.findOne({ where: { id } })
 
-        if (user) {
-            try {
-                await User.deleteUser(id)
+            if (user) {
+                try {
+                    await model.transaction(async (transaction) => {
+                        await userGame.destroy({ where: { id }, transaction })
+                        await userGameBiodata.destroy({ where: { user_game_id: id }, transaction })
+                    })
 
-                req.flash('msgType', 'success')
-                req.flash('msg', 'Delete User Success')
-            } catch (err) {
+                    req.flash('msgType', 'success')
+                    req.flash('msg', 'Delete User Success')
+                } catch (err) {
+                    req.flash('msgType', 'danger')
+                    req.flash('msg', 'Error occured while deleting user')
+                }
+            } else {
                 req.flash('msgType', 'danger')
-                req.flash('msg', 'Error occured while deleting user')
+                req.flash('msg', 'User not found')
             }
-        } else {
+
+            res.redirect('/dashboard/user')
+        } catch (err) {
             req.flash('msgType', 'danger')
-            req.flash('msg', 'User not found')
+            req.flash('msg', 'Error occured while deleting user')
+            res.redirect('/dashboard/user')
         }
 
-        res.redirect('/dashboard/user')
     }
 }

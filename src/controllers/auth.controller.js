@@ -1,42 +1,35 @@
 const bcrypt = require('bcrypt')
 
-const User = require('./../models/user.model')
+const model = require('./../models/index')
 
-const { generateToken } = require('../utils/jtwToken.utils')
+const userGame = model.database.user_game
+
+const { generateToken } = require('./../utils/jtwToken.utils')
 
 module.exports = {
     auth: async (req, res) => {
         const { username, password } = req.body
 
-        const user = await User.getUserByUsername(username, {
-            withPassword: true
-        })
+        try {
+            const user = await userGame.findOne({ where: { username } })
 
-        if (user.is_active) {
-            if (user) {
-                const match = await bcrypt.compare(password, user.password);
-                if (match) {
-                    const token = await generateToken(user.id)
+            const match = await bcrypt.compare(password, user.password);
+            if (match) {
+                const token = await generateToken(user.id)
 
-                    req.header.authorization = token
+                req.header.authorization = token
 
-                    res.redirect('/')
-                } else {
-                    req.flash('msgType', 'danger')
-                    req.flash('msg', 'Incorrect password')
-                    res.redirect('/login')
-                }
+                res.redirect('/')
             } else {
                 req.flash('msgType', 'danger')
-                req.flash('msg', 'Username not found')
+                req.flash('msg', 'Incorrect password')
                 res.redirect('/login')
             }
-        } else {
+        } catch (err) {
             req.flash('msgType', 'danger')
-            req.flash('msg', 'Username not active')
+            req.flash('msg', 'Username not found')
             res.redirect('/login')
         }
-
     },
     logout: (req, res) => {
         delete req.header.authorization
